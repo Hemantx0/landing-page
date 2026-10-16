@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#070706">
+  <title>Email Verified | Nearby Folk</title>
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/favicon-512x512.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="preload" href="/media/nf-logo.png?v=20260602b" as="image">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body class="legal-page account-action-page">
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <nav class="site-nav legal-nav" aria-label="Email verification page navigation">
+    <a class="brand" href="/" aria-label="Nearby Folk home">
+      <img src="/media/nf-logo.png?v=20260602b" alt="" width="36" height="36" class="brand-mark">
+      <span>Nearby Folk</span>
+    </a>
+    <div class="nav-links" aria-label="Email verification page links">
+      <a href="/privacy-policy">Privacy Policy</a>
+      <a href="/#download" class="nav-download">Download</a>
+    </div>
+  </nav>
+
+  <main id="main" class="legal-main action-main">
+    <section class="action-shell" aria-labelledby="actionTitle">
+      <a class="legal-back" href="/">
+        <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M12.8 4.8 7.6 10l5.2 5.2M8 10h8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Back to Home
+      </a>
+
+      <article class="action-card">
+        <p class="eyebrow"><span></span>Account Security</p>
+        <h1 id="actionTitle" class="action-title">Verifying your email</h1>
+        <p id="actionSubtitle" class="action-copy">Hold tight while we finish your Nearby Folk email verification.</p>
+
+        <div id="status" class="action-status" role="status">Checking your link...</div>
+
+        <div class="hero-actions action-actions">
+          <a id="openAppLink" class="button button-primary" href="nearbyfolk://verified">Open Nearby Folk</a>
+          <a class="button button-secondary action-home" href="/">Go to nearbyfolk.com</a>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+    import {
+      getAuth,
+      applyActionCode,
+      checkActionCode
+    } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDAguaVKGMqec-VVnUj3FTTkkhE9xhk21k",
+      authDomain: "nearby-folk-production.firebaseapp.com",
+      databaseURL: "https://nearby-folk-production-default-rtdb.firebaseio.com",
+      projectId: "nearby-folk-production",
+      storageBucket: "nearby-folk-production.firebasestorage.app",
+      messagingSenderId: "6317753030",
+      appId: "1:6317753030:web:1ae51e7bd6d8388e2c8dc7",
+      measurementId: "G-EF8HC51X21"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const params = new URLSearchParams(window.location.search);
+    const oobCode = params.get("oobCode");
+    const statusEl = document.getElementById("status");
+    const titleEl = document.getElementById("actionTitle");
+    const subtitleEl = document.getElementById("actionSubtitle");
+    const openAppLink = document.getElementById("openAppLink");
+    let fallbackTimer = 0;
+
+    function setStatus(message, type = "") {
+      statusEl.textContent = message;
+      statusEl.className = `action-status ${type}`.trim();
+    }
+
+    function tryOpenApp() {
+      clearTimeout(fallbackTimer);
+      fallbackTimer = window.setTimeout(() => {
+        if (document.visibilityState === "visible") {
+          window.location.replace("/");
+        }
+      }, 2400);
+      window.location.href = "nearbyfolk://verified";
+    }
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "hidden") {
+        clearTimeout(fallbackTimer);
+      }
+    });
+
+    openAppLink.addEventListener("click", (event) => {
+      event.preventDefault();
+      tryOpenApp();
+    });
+
+    async function completeVerification() {
+      if (!oobCode) {
+        titleEl.textContent = "Email verified";
+        subtitleEl.textContent = "Opening Nearby Folk. If the app is not installed, we will take you to the website.";
+        setStatus("Your email is verified. Opening the app...", "success");
+        tryOpenApp();
+        return;
+      }
+
+      try {
+        await checkActionCode(auth, oobCode);
+        await applyActionCode(auth, oobCode);
+        titleEl.textContent = "Email verified";
+        subtitleEl.textContent = "Opening Nearby Folk. If the app is not installed, we will take you to the website.";
+        setStatus("Your email has been verified. Opening the app...", "success");
+        tryOpenApp();
+      } catch (error) {
+        titleEl.textContent = "Verification link expired";
+        subtitleEl.textContent = "Please request a fresh verification email from the app.";
+        setStatus("This email verification link is invalid or expired.", "error");
+      }
+    }
+
+    completeVerification();
+  </script>
+</body>
+</html>

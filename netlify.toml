@@ -1,0 +1,165 @@
+[build]
+  publish = "."
+  command = ""
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "geolocation=(), camera=(), microphone=()"
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=86400, must-revalidate"
+
+[[headers]]
+  for = "/media/*"
+  [headers.values]
+    Cache-Control = "public, max-age=86400, must-revalidate"
+
+[[headers]]
+  for = "/favicon.ico"
+  [headers.values]
+    Cache-Control = "public, max-age=86400, must-revalidate"
+
+[[headers]]
+  for = "/favicon-*.png"
+  [headers.values]
+    Cache-Control = "public, max-age=86400, must-revalidate"
+
+[[headers]]
+  for = "/apple-touch-icon.png"
+  [headers.values]
+    Cache-Control = "public, max-age=86400, must-revalidate"
+
+[[headers]]
+  for = "/reset-password.html"
+  [headers.values]
+    Cache-Control = "no-store"
+
+[[headers]]
+  for = "/verify-email"
+  [headers.values]
+    Cache-Control = "no-store"
+
+[[headers]]
+  for = "/verify-email/*"
+  [headers.values]
+    Cache-Control = "no-store"
+
+[[headers]]
+  for = "/premium-checkout"
+  [headers.values]
+    Cache-Control = "no-store, max-age=0"
+
+[[headers]]
+  for = "/premium-checkout.html"
+  [headers.values]
+    Cache-Control = "no-store, max-age=0"
+
+[[redirects]]
+  from = "/privacy"
+  to = "/privacy-policy"
+  status = 301
+
+[[redirects]]
+  from = "/privacy.html"
+  to = "/privacy-policy"
+  status = 301
+
+[[redirects]]
+  from = "/terms"
+  to = "/terms/index.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/terms/"
+  to = "/terms/index.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/terms.html"
+  to = "/terms/index.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/cancellation-return"
+  to = "/cancellation-return/index.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/cancellation-return/"
+  to = "/cancellation-return/index.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/shipping-exchange"
+  to = "/shipping-exchange/index.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/shipping-exchange/"
+  to = "/shipping-exchange/index.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/community"
+  to = "/community-guidelines"
+  status = 301
+
+[[redirects]]
+  from = "/community.html"
+  to = "/community-guidelines"
+  status = 301
+
+[[redirects]]
+  from = "/guidelines"
+  to = "/community-guidelines"
+  status = 301
+
+[[redirects]]
+  from = "/account-deletion.html"
+  to = "/account-deletion"
+  status = 301
+
+[[redirects]]
+  from = "/reset-password"
+  to = "/reset-password.html"
+  status = 200
+
+[[redirects]]
+  from = "/verify-email"
+  to = "/verify-email/index.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/verify-email/"
+  to = "/verify-email/index.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/account-action"
+  to = "/reset-password.html"
+  status = 200
+
+[[redirects]]
+  from = "/__/auth/action"
+  to = "/reset-password.html"
+  status = 200
+
+[[redirects]]
+  from = "/premium-checkout"
+  to = "/premium-checkout.html"
+  status = 200

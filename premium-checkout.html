@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#070706">
+  <title>Premium Checkout | Nearby Folk</title>
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/favicon-512x512.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="preconnect" href="https://checkout.razorpay.com">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="preload" href="/media/nf-logo.png?v=20260602b" as="image">
+  <link rel="stylesheet" href="/styles.css?v=20260910-trial-checkout">
+</head>
+<body class="legal-page checkout-page">
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <nav class="site-nav legal-nav" aria-label="Premium checkout page navigation">
+    <a class="brand" href="/" aria-label="Nearby Folk home">
+      <img src="/media/nf-logo.png?v=20260602b" alt="" width="36" height="36" class="brand-mark">
+      <span>Nearby Folk</span>
+    </a>
+    <div class="nav-links" aria-label="Premium checkout page links">
+      <a href="/privacy-policy">Privacy Policy</a>
+      <a href="/#download" class="nav-download">Download</a>
+    </div>
+  </nav>
+
+  <main id="main" class="legal-main action-main">
+    <section class="action-shell" aria-labelledby="checkoutTitle">
+      <a class="legal-back" href="/">
+        <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M12.8 4.8 7.6 10l5.2 5.2M8 10h8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Back to Home
+      </a>
+
+      <article class="action-card">
+        <p class="eyebrow"><span></span>Secure Checkout</p>
+        <h1 id="checkoutTitle" class="action-title">Unlock Premium</h1>
+        <p id="checkoutCopy" class="action-copy">Complete your Razorpay checkout here. Your app subscription will update automatically after verification.</p>
+
+        <div id="checkoutPlan" class="checkout-plan" aria-label="Selected plan">
+          <div>
+            <strong id="planName">Loading plan...</strong>
+            <span id="planSubtitle">Preparing secure checkout</span>
+          </div>
+          <div class="checkout-price">
+            <del id="originalPrice"></del>
+            <b id="price">--</b>
+          </div>
+        </div>
+
+        <div id="trialNotice" class="checkout-trial-notice" role="note" hidden>
+          <strong>Refundable ₹5 verification</strong>
+          <span>Razorpay will temporarily collect ₹5 to verify your UPI AutoPay or card mandate. Razorpay automatically refunds this amount.</span>
+        </div>
+
+        <button id="payButton" class="button button-primary action-submit" type="button" disabled>Preparing...</button>
+        <a id="openAppButton" class="button checkout-open-app" href="#" hidden>Open Nearby Folk</a>
+        <div id="status" class="action-status checkout-status" role="status">Please wait while we create your secure checkout.</div>
+
+        <p id="checkoutNote" class="action-note">
+          Payments are processed by Razorpay. After successful verification, this page will open Nearby Folk automatically.
+          Need help? <a href="mailto:support@nearbyfolk.com">support@nearbyfolk.com</a>
+        </p>
+      </article>
+    </section>
+  </main>
+
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <script>
+    const isDevelopmentHost = window.location.hostname === 'nearby-folk-development-d1d9e.web.app' ||
+      window.location.hostname === 'nearby-folk-development-d1d9e.firebaseapp.com';
+    const API_BASE = isDevelopmentHost
+      ? 'https://dev-api.nearbyfolk.com'
+      : 'https://api.nearbyfolk.com';
+    const params = new URLSearchParams(window.location.search);
+    const sessionId = params.get('session');
+    const requestedEntitlement = params.get('entitlement') || 'premium';
+    const payButton = document.getElementById('payButton');
+    const openAppButton = document.getElementById('openAppButton');
+    const statusEl = document.getElementById('status');
+    const checkoutTitle = document.getElementById('checkoutTitle');
+    const checkoutCopy = document.getElementById('checkoutCopy');
+    const checkoutNote = document.getElementById('checkoutNote');
+    const checkoutPlan = document.getElementById('checkoutPlan');
+    const trialNotice = document.getElementById('trialNotice');
+    const planName = document.getElementById('planName');
+    const planSubtitle = document.getElementById('planSubtitle');
+    const priceEl = document.getElementById('price');
+    const originalPriceEl = document.getElementById('originalPrice');
+    let checkout = null;
+
+    function appReturnUrl(entitlement) {
+      const scheme = isDevelopmentHost ? 'nearbyfolk-dev' : 'nearbyfolk';
+      const safeEntitlement = entitlement === 'profile_effects_pass'
+        ? 'profile_effects_pass'
+        : 'premium';
+      return scheme + '://payment-success?entitlement=' + safeEntitlement;
+    }
+
+    function returnToApp(entitlement) {
+      const url = appReturnUrl(entitlement);
+      openAppButton.href = url;
+      openAppButton.hidden = false;
+      window.setTimeout(function() {
+        window.location.assign(url);
+      }, 650);
+    }
+
+    const checkoutCopyByEntitlement = {
+      premium: {
+        title: 'Unlock Premium',
+        copy: 'Complete your Razorpay checkout here. Your app subscription will update automatically after verification.',
+        monthlyName: 'Monthly Premium',
+        yearlyName: 'Yearly Premium',
+        description: 'Nearby Folk Premium',
+        activated: 'Premium Activated',
+        success: 'Payment verified. Opening Nearby Folk now...',
+        note: 'Payments are processed by Razorpay. After successful verification, this page will open Nearby Folk automatically. Need help? ',
+      },
+      profile_effects_pass: {
+        title: 'Unlock Profile Effect Pass',
+        copy: 'Complete your Razorpay checkout here. Your Profile Effect Pass will update automatically after verification.',
+        monthlyName: 'Profile Effect Pass',
+        yearlyName: 'Profile Effect Pass',
+        description: 'Profile Effect Pass',
+        activated: 'Pass Activated',
+        success: 'Payment verified. Opening Nearby Folk now...',
+        note: 'Payments are processed by Razorpay. After successful verification, this page will open Nearby Folk automatically. For any issue with your Profile Effect Pass, contact ',
+      },
+    };
+
+    function rupees(paise) {
+      return '₹' + Math.round(Number(paise || 0) / 100).toLocaleString('en-IN');
+    }
+
+    function validTrialDays(value) {
+      const days = Number(value);
+      return Number.isInteger(days) && days > 0 && days <= 30 ? days : null;
+    }
+
+    function copyFor(entitlement) {
+      return checkoutCopyByEntitlement[entitlement] || checkoutCopyByEntitlement.premium;
+    }
+
+    function applyCheckoutCopy(entitlement) {
+      const copy = copyFor(entitlement);
+      document.title = copy.title + ' | Nearby Folk';
+      checkoutTitle.textContent = copy.title;
+      checkoutCopy.textContent = copy.copy;
+      checkoutPlan.setAttribute('aria-label', copy.monthlyName + ' plan');
+      checkoutNote.innerHTML = copy.note + '<a href="mailto:support@nearbyfolk.com">support@nearbyfolk.com</a>';
+      return copy;
+    }
+
+    function setStatus(message, tone) {
+      statusEl.textContent = message;
+      statusEl.className = 'action-status checkout-status' + (tone ? ' ' + tone : '');
+    }
+
+    function wait(milliseconds) {
+      return new Promise(function(resolve) {
+        window.setTimeout(resolve, milliseconds);
+      });
+    }
+
+    async function postJson(path, body) {
+      const response = await fetch(API_BASE + path, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(payload.error || 'Something went wrong. Please try again.');
+      }
+      return payload;
+    }
+
+    async function prepareCheckout() {
+      if (!sessionId) {
+        throw new Error('Checkout session is missing. Please start again from the app.');
+      }
+      const payload = await postJson('/v1/payments/razorpay/subscription', { sessionId });
+      const sub = payload.subscription;
+      if (!sub || !sub.subscriptionId || !sub.keyId) {
+        throw new Error('Checkout could not be prepared. Please try again.');
+      }
+
+      const isYearly = sub.planType === 'yearly';
+      const entitlement = sub.entitlement || requestedEntitlement;
+      const copy = applyCheckoutCopy(entitlement);
+      const trialDays = entitlement === 'premium'
+        ? validTrialDays(sub.trialDays)
+        : null;
+      const isTrial = trialDays !== null;
+      const renewalPeriod = isYearly ? 'year' : 'month';
+      const renewalPrice = rupees(sub.amount);
+      planName.textContent = isYearly ? copy.yearlyName : copy.monthlyName;
+      checkoutPlan.setAttribute(
+        'aria-label',
+        (isYearly ? copy.yearlyName : copy.monthlyName) + ' plan',
+      );
+
+      if (isTrial) {
+        checkoutTitle.textContent = 'Start your ' + trialDays + '-day free trial';
+        checkoutCopy.textContent = 'Authorize recurring billing securely with Razorpay. Your Premium access starts after verification.';
+        planSubtitle.textContent = trialDays + ' days free · then ' + renewalPrice + '/' + renewalPeriod;
+        priceEl.textContent = '₹0 today';
+        originalPriceEl.textContent = '';
+        originalPriceEl.hidden = true;
+        trialNotice.hidden = false;
+      } else {
+        planSubtitle.textContent = isYearly ? 'Billed yearly' : 'Billed monthly';
+        priceEl.textContent = renewalPrice;
+        originalPriceEl.textContent = rupees(sub.originalAmount);
+        originalPriceEl.hidden = false;
+        trialNotice.hidden = true;
+      }
+
+      checkout = new Razorpay({
+        key: sub.keyId,
+        subscription_id: sub.subscriptionId,
+        name: sub.name || 'Nearby Folk',
+        description: isTrial
+          ? trialDays + '-day free trial; ' + renewalPrice + '/' + renewalPeriod + ' after trial'
+          : sub.description || copy.description,
+        notes: {
+          checkoutSessionId: sessionId,
+          entitlement,
+          planType: sub.planType,
+        },
+        theme: { color: '#ff6b00' },
+        handler: async function(response) {
+          payButton.disabled = true;
+          payButton.textContent = 'Verifying...';
+          setStatus('Verifying your payment securely...', null);
+          try {
+            let verificationError = null;
+            for (let attempt = 0; attempt < 5; attempt += 1) {
+              try {
+                await postJson('/v1/payments/razorpay/verify', {
+                  sessionId,
+                  razorpaySubscriptionId:
+                    response.razorpay_subscription_id || sub.subscriptionId,
+                  razorpayPaymentId: response.razorpay_payment_id || null,
+                  razorpaySignature: response.razorpay_signature || null,
+                });
+                verificationError = null;
+                break;
+              } catch (error) {
+                verificationError = error;
+                const securityFailure =
+                  error.message.includes('signature verification failed') ||
+                  error.message.includes('does not match this checkout session');
+                if (securityFailure || attempt === 4) break;
+                await wait(1200);
+              }
+            }
+            if (verificationError) throw verificationError;
+            payButton.textContent = isTrial ? 'Trial Activated' : copy.activated;
+            setStatus(
+              isTrial
+                ? 'Your ' + trialDays + '-day free trial is active. Your first ' + renewalPrice + ' subscription payment is scheduled after the trial.'
+                : copy.success,
+              'success',
+            );
+            returnToApp(entitlement);
+          } catch (error) {
+            payButton.textContent = 'Authorization received';
+            openAppButton.href = appReturnUrl(entitlement);
+            openAppButton.textContent = 'Return to Nearby Folk';
+            openAppButton.hidden = false;
+            setStatus(
+              'Razorpay received the authorization, but status syncing is taking longer than expected. Return to Nearby Folk and tap Refresh Status. Do not pay again.',
+              'error',
+            );
+          }
+        },
+        modal: {
+          ondismiss: function() {
+            setStatus(
+              isTrial
+                ? 'Verification cancelled. No subscription payment was made. You can try again when ready.'
+                : 'Checkout closed. You can tap Pay Securely to try again.',
+              null,
+            );
+          },
+        },
+      });
+
+      payButton.disabled = false;
+      payButton.textContent = isTrial
+        ? 'Continue to ₹5 refundable verification'
+        : 'Pay Securely';
+      setStatus(
+        isTrial
+          ? 'No Premium subscription fee today. The ₹5 shown by Razorpay is a refundable mandate verification.'
+          : 'Ready. Tap the button to open Razorpay checkout.',
+        null,
+      );
+    }
+
+    payButton.addEventListener('click', function(event) {
+      event.preventDefault();
+      if (!checkout) return;
+      checkout.open();
+    });
+
+    applyCheckoutCopy(requestedEntitlement);
+    prepareCheckout().catch(function(error) {
+      payButton.disabled = true;
+      payButton.textContent = 'Checkout Unavailable';
+      setStatus(error.message, 'error');
+    });
+  </script>
+</body>
+</html>
