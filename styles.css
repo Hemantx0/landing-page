@@ -283,6 +283,13 @@ main > section:not(.brand-intro) {
   mask-image: linear-gradient(to bottom, transparent 0, #000 96px, #000 100%);
 }
 
+/* The opening panel owns the first viewport before the next section begins. */
+.brand-intro + .hero {
+  margin-top: 0;
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+
 main > section::after {
   content: "";
   position: absolute;
@@ -2691,6 +2698,13 @@ body.modal-open { overflow: hidden; }
   .twist-more-games { justify-content: center; gap: 8px 20px; margin-top: 30px; padding: 20px 0; }
   .twist-more-games li { font-size: 0.65rem; letter-spacing: 0.12em; }
   .twist-more-games li::before { content: "•"; margin-right: 9px; }
+  .features .split-heading { grid-template-columns: minmax(0, 1fr); }
+  .features .split-heading > div { min-width: 0; }
+  .features .split-heading h2 {
+    font-size: clamp(2.45rem, 11vw, 3.1rem);
+    line-height: 0.98;
+    overflow-wrap: anywhere;
+  }
   .feature-grid { padding: 10px; }
   .feature-card { min-height: auto; }
   main > section:not(.brand-intro) {
@@ -2745,6 +2759,25 @@ body.modal-open { overflow: hidden; }
   .final-cta .store-button { width: 100%; }
 }
 
+/* iPhone WebKit: show one complete phone per swipe without changing Android. */
+@media (max-width: 680px) {
+  @supports (-webkit-touch-callout: none) {
+    .peek .phone-gallery {
+      width: 100%;
+      margin-right: 0;
+      padding: 8px 0 30px;
+    }
+
+    .peek .showcase-phone {
+      width: 100%;
+      flex: 0 0 100%;
+    }
+
+    .peek .showcase-phone .phone-shell { width: min(100%, 218px); }
+    .peek .screenshot-screen img { object-fit: contain; }
+  }
+}
+
 @media (max-height: 520px) and (min-width: 431px) {
   .final-inner { padding-top: 22px; padding-bottom: 16px; }
   .final-inner .eyebrow { margin-bottom: 8px; }
@@ -2755,9 +2788,9 @@ body.modal-open { overflow: hidden; }
 
 /* Desktop layout balance ------------------------------------------------- */
 @media (min-width: 921px) {
-  /* The opening brand panel follows the same desktop hierarchy as the hero. */
+  /* Keep the next section below the first screen on desktop. */
   .brand-intro {
-    min-height: clamp(660px, 78svh, 820px);
+    min-height: 100svh;
     padding-top: 102px;
     padding-bottom: 64px;
   }
